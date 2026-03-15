@@ -1,89 +1,173 @@
-# kafka-lab
-## Описание проекта
-
-Данный проект демонстрирует работу потоковой обработки данных в реальном времени с использованием Apache Kafka.
-
-Приложение состоит из двух компонентов:
-
-- **Producer** — генерирует сообщения в формате JSON и отправляет их в Kafka.
-- **Consumer** — получает сообщения из Kafka, выполняет их проверку (валидацию) и выводит результат в консоль.
-
-Сообщения содержат информацию о вылетающих рейсах аэропорта.
+# Лабораторная работа №1  
+## Потоковая обработка данных в реальном времени с использованием Apache Kafka
 
 ---
 
-## Структура проекта
+## Цель работы
 
-```
-kafka_stream_lab
-│
-├── producer.py # отправка сообщений в Kafka
-├── consumer.py # получение и проверка сообщений
-├── generator.py # генерация данных
-├── config.py # настройки Kafka
-├── docker-compose.yml
-├── requirements.txt
-└── README.md
-```
-## Стек технологий
+Изучить потоковую обработку данных с помощью Apache Kafka и реализовать полный цикл передачи данных: генерация события → Producer → Kafka → Consumer → валидация.
 
--Apache Kafka
--Python
--Docker
--JSON
+---
 
-## Формат сообщений
+## Задачи
 
-Producer генерирует JSON-сообщения следующего вида:
+- Развернуть Apache Kafka;  
+- Разработать Kafka Producer для генерации событий пункта приема вторсырья;  
+- Разработать Kafka Consumer для получения и проверки сообщений;  
+- Реализовать генерацию сообщений в формате JSON;  
+- Проверить корректность передачи данных в реальном времени.
+
+---
+
+## Тема лабораторной работы
+
+**Пункт приема вторсырья**
+
+Producer генерирует события сдачи вторсырья:
+
+- `deposit` — материал принят  
+- `reject` — материал не принят  
+
+Consumer принимает сообщения, валидирует их и выводит результат в консоль.
+
+---
+
+## Архитектура приложения
+
+Generator → Producer → Apache Kafka → Consumer
+
+### Компоненты
+
+- **generator.py** — генерация сообщений (отделена от Producer согласно принципам SOLID);  
+- **producer.py** — отправка сообщений в Kafka;  
+- **consumer.py** — получение и проверка сообщений;  
+- **Kafka Topic:** `recycling`.  
+
+---
+
+## Формат сообщения
+
+Пример JSON-сообщения:
 
 ```json
 {
-  "flight_number": "LH123",
-  "destination": "Paris",
-  "departure_time": "14:32:18",
-  "status": "boarding"
+  "user": "Anna",
+  "material": "Plastic",
+  "action": "deposit",
+  "weight_kg": 2.35,
+  "time": "2026-03-15 20:10:12"
 }
 ```
-## Установка зависимостей
+## Поля
+| Поле      | Описание                        |
+| --------- | ------------------------------- |
+| user      | имя человека, сдающего материал |
+| material  | вид вторсырья                   |
+| action    | действие (`deposit` / `reject`) |
+| weight_kg | вес материала в килограммах     |
+| time      | время события                   |
 
-Перед запуском необходимо установить Python-библиотеки:
-``` bash
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
+## Требования
+
+- Python 3.9+
+- Apache Kafka
+- kafka-python
+
+## Установка зависимостей
 ```
-## Запуск Kafka
-Kafka и Zookeeper запускаются с помощью Docker.
+pip install kafka-python
 ```
-docker-compose up -d
-Запуск Consumer
+
+## Запуск проекта
+1. Запуск Zookeeper
 ```
-## Запуск Consumer
-В одном терминале запустить:
+bin/zookeeper-server-start.sh config/zookeeper.properties
+```
+2. Запуск Kafka
+```
+bin/kafka-server-start.sh config/server.properties
+```
+3. Создание топика
+```
+bin/kafka-topics.sh --create \
+--topic recycling \
+--bootstrap-server localhost:9092 \
+--partitions 1 \
+--replication-factor 1
+```
+4. Запуск Consumer
 ```
 python consumer.py
-Запуск Producer
 ```
-## Запуск Producer
-В другом терминале выполнить:
+5. Запуск Producer
 ```
 python producer.py
 ```
-## Результат работы
-Producer генерирует сообщения и отправляет их в Kafka.
-Consumer получает сообщения, проверяет их корректность и выводит результат.
+## Структура проекта
+kafka_recycling/
+│
+├── generator.py
+├── producer.py
+├── consumer.py
+└── README.md
 
-## Пример вывода Producer:
+##  Результат выполнения лабораторной работы
+
+В ходе лабораторной работы реализована система потоковой обработки данных для пункта приема вторсырья с использованием Apache Kafka.  
+
+##  Работа Producer
+
+- Producer генерирует события сдачи вторсырья каждые несколько секунд.  
+- Каждое сообщение содержит: пользователя, тип материала, действие (`deposit` или `reject`), вес в кг и время события.  
+- Сообщение выводится в консоль Producer и отправляется в Kafka-топик `recycling`.
+
+**Пример вывода Producer:**
 ```
-Generated message: {"flight_number":"LH123","destination":"Paris","departure_time":"14:45:22","status":"boarding"}
-```
-## Пример вывода Consumer:
-```
-VALID MESSAGE: {"flight_number":"LH123","destination":"Paris","departure_time":"14:45:22","status":"boarding"}
-```
-## Архитектура системы
-```
-Producer → Kafka → Consumer
+Produced: {"user": "Anna", "material": "Plastic", "action": "deposit", "weight_kg": 2.35, "time": "2026-03-15 20:10:12"}
+Produced: {"user": "Ivan", "material": "Glass", "action": "reject", "weight_kg": 5.00, "time": "2026-03-15 20:10:14"}
+Produced: {"user": "Maria", "material": "Paper", "action": "deposit", "weight_kg": 3.75, "time": "2026-03-15 20:10:16"}
 ```
 
-Producer отправляет сообщения в Kafka, после чего Consumer получает и обрабатывает их.
+---
+
+## Работа Consumer
+
+- Consumer получает сообщения из Kafka-топика `recycling`.  
+- Каждое сообщение проверяется на наличие всех полей и корректность значений.  
+- Результат проверки выводится в консоль:
+
+**Пример вывода Consumer (валидные сообщения):**
+```
+VALID: {'user': 'Anna', 'material': 'Plastic', 'action': 'deposit', 'weight_kg': 2.35, 'time': '2026-03-15 20:10:12'}
+VALID: {'user': 'Ivan', 'material': 'Glass', 'action': 'reject', 'weight_kg': 5.0, 'time': '2026-03-15 20:10:14'}
+VALID: {'user': 'Maria', 'material': 'Paper', 'action': 'deposit', 'weight_kg': 3.75, 'time': '2026-03-15 20:10:16'}
+```
+
+**Пример невалидного сообщения:**
+```
+NOT VALID: {"user":"Ivan","material":"Glass","action":"deposit"}
+```
+
+- Такое сообщение считается некорректным, так как отсутствует поле `weight_kg` или `time`.
+
+---
+
+## Итоговый результат
+
+- Apache Kafka успешно развернута и работает.  
+- Producer и Consumer корректно обмениваются сообщениями в реальном времени.  
+- Сообщения валидируются: корректные выводятся как **VALID**, а некорректные как **NOT VALID**.  
+- Реализована цепочка **Generator → Producer → Kafka → Consumer**, демонстрирующая полный цикл потоковой обработки данных.  
+- Система позволяет отслеживать события приема вторсырья и фильтровать некорректные данные без потерь.
+
+## Используемые технологии
+- Apache Kafka — брокер сообщений
+- Python — язык программирования
+- kafka-python — клиент Kafka для Python
+- JSON — формат обмена данными
+
+  
+## Дополнительные материалы
+- https://kafka.apache.org
+- https://habr.com/ru/companies/otus/articles/789896/
+- https://stepik.org/course/258122
