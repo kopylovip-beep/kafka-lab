@@ -1,21 +1,16 @@
 from kafka import KafkaProducer
+from generator import generate_recycling_event
 import time
-from generator import generate_message
-from config import KAFKA_SERVER, TOPIC_NAME
 
 producer = KafkaProducer(
-    bootstrap_servers=KAFKA_SERVER,
+    bootstrap_servers="localhost:9092",
     value_serializer=lambda v: v.encode("utf-8")
 )
 
-print("Producer started")
+topic = "recycling"
 
 while True:
-
-    message = generate_message()
-
-    print("Generated message:", message)
-
-    producer.send(TOPIC_NAME, message)
-
+    message = generate_recycling_event()
+    print("Produced:", message)
+    producer.send(topic, message)
     time.sleep(2)
