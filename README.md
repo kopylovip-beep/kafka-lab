@@ -25,7 +25,11 @@ kafka_stream_lab
 ├── requirements.txt
 └── README.md
 
+## Стек технологий
 
+- **Apache Kafka 4.2.0** (KRaft mode, без ZooKeeper) — брокер сообщений
+- **Python 3** — язык разработки скриптов
+- **kafka-python** — клиентская библиотека для работы с Kafka из Python
 ---
 
 ## Формат сообщений
@@ -39,36 +43,29 @@ Producer генерирует JSON-сообщения следующего ви�
   "departure_time": "14:32:18",
   "status": "boarding"
 }
-Установка зависимостей
+```
+## Установка зависимостей
 
 Перед запуском необходимо установить Python-библиотеки:
-
+``` bash
+python -m venv venv
+venv\Scripts\activate
 pip install -r requirements.txt
-Запуск Kafka
-
+```
 Kafka и Zookeeper запускаются с помощью Docker.
-
+```
 docker-compose up -d
 Запуск Consumer
-
+```
 В одном терминале запустить:
-
+```
 python consumer.py
 Запуск Producer
-
+```
 В другом терминале выполнить:
-
+```
 python producer.py
-
-Используемые технологии
-
-Apache Kafka
-
-Python
-
-Docker
-
-JSON
+```
 
 Архитектура системы
 Producer → Kafka → Consumer
