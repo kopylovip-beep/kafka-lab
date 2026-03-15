@@ -1,35 +1,30 @@
 from kafka import KafkaConsumer
 import json
-from config import KAFKA_SERVER, TOPIC_NAME
 
 consumer = KafkaConsumer(
-    TOPIC_NAME,
-    bootstrap_servers=KAFKA_SERVER,
+    "recycling",
+    bootstrap_servers="localhost:9092",
     value_deserializer=lambda m: m.decode("utf-8")
 )
 
-print("Consumer started")
-
-def validate_message(message):
-    try:
-        data = json.loads(message)
-        required_fields = [
-            "flight_number",
-            "destination",
-            "departure_time",
-            "status"
-        ]
-        for field in required_fields:
-            if field not in data:
-                return False
-
-        return True
-    except:
+def validate(data):
+    required_fields = ["user", "material", "action", "weight_kg", "time"]
+    for field in required_fields:
+        if field not in data:
+            return False
+    if data["action"] not in ["deposit", "reject"]:
         return False
+    if not isinstance(data["weight_kg"], (int, float)):
+        return False
+    return True
 
-for msg in consumer:
-    message = msg.value
-    if validate_message(message):
-        print("VALID MESSAGE:", message)
-    else:
-        print("NOT VALID:", message)
+for message in consumer:
+    msg = message.value
+    try:
+        data = json.loads(msg)
+        if validate(data):
+            print("VALID:", data)
+        else:
+            print("NOT VALID:", msg)
+    except Exception:
+        print("NOT VALID:", msg)
