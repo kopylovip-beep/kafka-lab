@@ -4,7 +4,9 @@ import json
 consumer = KafkaConsumer(
     "recycling",
     bootstrap_servers="localhost:9092",
-    value_deserializer=lambda m: m.decode("utf-8")
+    value_deserializer=lambda m: json.loads(m.decode("utf-8")),
+    auto_offset_reset='earliest',
+    enable_auto_commit=True
 )
 
 def validate(data):
