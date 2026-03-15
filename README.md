@@ -14,7 +14,7 @@
 
 ## Структура проекта
 
-
+```
 kafka_stream_lab
 │
 ├── producer.py # отправка сообщений в Kafka
@@ -24,7 +24,7 @@ kafka_stream_lab
 ├── docker-compose.yml
 ├── requirements.txt
 └── README.md
-
+```
 ## Стек технологий
 
 - **Apache Kafka 4.2.0** (KRaft mode, без ZooKeeper) — брокер сообщений
