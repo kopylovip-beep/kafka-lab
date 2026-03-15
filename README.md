@@ -27,10 +27,10 @@ kafka_stream_lab
 ```
 ## Стек технологий
 
-- **Apache Kafka 4.2.0** (KRaft mode, без ZooKeeper) — брокер сообщений
-- **Python 3** — язык разработки скриптов
-- **kafka-python** — клиентская библиотека для работы с Kafka из Python
----
+-Apache Kafka
+-Python
+-Docker
+-JSON
 
 ## Формат сообщений
 
@@ -52,22 +52,38 @@ python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
 ```
+## Запуск Kafka
 Kafka и Zookeeper запускаются с помощью Docker.
 ```
 docker-compose up -d
 Запуск Consumer
 ```
+## Запуск Consumer
 В одном терминале запустить:
 ```
 python consumer.py
 Запуск Producer
 ```
+## Запуск Producer
 В другом терминале выполнить:
 ```
 python producer.py
 ```
+## Результат работы
+Producer генерирует сообщения и отправляет их в Kafka.
+Consumer получает сообщения, проверяет их корректность и выводит результат.
 
-Архитектура системы
+## Пример вывода Producer:
+```
+Generated message: {"flight_number":"LH123","destination":"Paris","departure_time":"14:45:22","status":"boarding"}
+```
+## Пример вывода Consumer:
+```
+VALID MESSAGE: {"flight_number":"LH123","destination":"Paris","departure_time":"14:45:22","status":"boarding"}
+```
+## Архитектура системы
+```
 Producer → Kafka → Consumer
+```
 
 Producer отправляет сообщения в Kafka, после чего Consumer получает и обрабатывает их.
